@@ -14,7 +14,7 @@ public class Peon extends Trebejo {
 	protected Boolean esMovimientoValido(Movimiento movimiento) {
 		int factor = blanca ? 1 : -1;
 		Boolean result = movimiento.getDeltaH() == 0
-				&& (factor * movimiento.getDeltaV() == 1 || ceroKM
+				&& (factor * movimiento.getDeltaV() == 1 || movimientos < 1
 						&& factor * movimiento.getDeltaV() == 2);
 
 		if (!result) {
@@ -26,7 +26,12 @@ public class Peon extends Trebejo {
 	}
 
 	private boolean checkCaptura(Movimiento movimiento) {
-		return checkCapturaNormal(movimiento);
+		boolean result = checkCapturaNormal(movimiento);
+		if(!result && checkCapturaAlPaso(movimiento)) {
+			movimiento.setPasado(getTrebejoAlPaso(movimiento));
+			result = true;
+		}
+		return result;
 	}
 
 	private boolean checkCapturaNormal(Movimiento movimiento) {
@@ -51,14 +56,19 @@ public class Peon extends Trebejo {
 
 	private boolean checkCapturaAlPaso(Movimiento movimiento) {
 		int factor = blanca ? 1 : -1;
-		Posicion alPaso = movimiento.getDestino().clone();
-		alPaso.setV((byte) (alPaso.getV() - movimiento.getSentidoV()));
-		Trebejo trebejoAlPaso = movimiento.getTablero()
-				.getTrebejoEn(alPaso);
+		Trebejo trebejoAlPaso = getTrebejoAlPaso(movimiento);
 		return movimiento.getDeltaH() == 1
 				&& (factor * movimiento.getSentidoV() * movimiento.getDeltaV() == 1)
 				&& trebejoAlPaso != null && trebejoAlPaso.getBlanca()
 						.equals(movimiento.getTrebejo().getBlanca());
+	}
+
+	private Trebejo getTrebejoAlPaso(Movimiento movimiento) {
+		Posicion alPaso = movimiento.getDestino().clone();
+		alPaso.setV((byte) (alPaso.getV() - movimiento.getSentidoV()));
+		Trebejo trebejoAlPaso = movimiento.getTablero()
+				.getTrebejoEn(alPaso);
+		return trebejoAlPaso;
 	}
 
 }

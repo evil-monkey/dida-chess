@@ -9,9 +9,8 @@ public abstract class Trebejo {
 	protected Boolean blanca;
 	protected Boolean enroca;
 	protected Boolean pasable;
-
-	protected Boolean ceroKM;
-
+	protected Byte movimientos;
+	
 	/**
 	 * 
 	 * @param movimiento
@@ -36,7 +35,7 @@ public abstract class Trebejo {
 	public Trebejo(Posicion posicion, Boolean blanca) {
 		this.posicion = posicion;
 		this.blanca = blanca;
-		this.ceroKM = true;
+		this.movimientos = 0;
 		this.enroca = false;
 		this.pasable = false;
 	}
@@ -57,7 +56,7 @@ public abstract class Trebejo {
 				movimiento.getTablero().coronar(this);
 			}
 
-			ceroKM = false;
+			movimientos++;
 		}
 		return valido;
 	}
@@ -100,8 +99,8 @@ public abstract class Trebejo {
 		return blanca;
 	}	
 	
-	public Boolean getCeroKm() {
-		return ceroKM;
+	public Byte getMovimientos() {
+		return movimientos;
 	}
 
 	public Boolean getEnroca() {

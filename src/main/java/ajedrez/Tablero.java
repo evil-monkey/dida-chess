@@ -156,37 +156,6 @@ public class Tablero {
 		return true;
 	}
 
-	public boolean getEnrocable(Movimiento movimiento) {
-
-		Boolean enrocable = false;
-
-		Posicion candidataTorre = new Posicion(
-				(byte) (movimiento.getSentidoH() > 0 ? 8 : 1), movimiento
-						.getTrebejo().getPosicion().getV());
-
-		int diff = Math.abs(candidataTorre.getH()
-				- movimiento.getTrebejo().getPosicion().getH());
-
-		while (!enrocable && diff > 0) {
-			Posicion nuevaPosicion = new Posicion(
-					(byte) (movimiento.getTrebejo().getPosicion().getH() + movimiento
-							.getSentidoH()), candidataTorre.getV());
-
-			diff = Math.abs(candidataTorre.getH() - nuevaPosicion.getH());
-
-			Trebejo okupa = getTrebejoEn(nuevaPosicion);
-
-			if (okupa != null
-					&& movimiento.getTrebejo().getBlanca()
-							.equals(okupa.getBlanca()) && okupa.getEnroca()
-					&& okupa.getCeroKm()) {
-				enrocable = true;
-			}
-		}
-
-		return enrocable;
-	}
-
 	public Trebejo getTrebejoEn(Posicion lugar) {
 		Trebejo trebejo = null;
 

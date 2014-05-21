@@ -11,7 +11,12 @@ public class Rey extends Trebejo {
 
 	@Override
 	protected Boolean esMovimientoValido(Movimiento movimiento) {
-		return esMovimientoNormal(movimiento) || checkEnroque(movimiento);
+		Boolean result = esMovimientoNormal(movimiento);
+		if(!result && checkEnroque(movimiento)) {
+			movimiento.setEnrocado(getTorreCandidata(movimiento));
+			result = true;
+		}
+		return result;
 	}
 
 	private boolean esMovimientoNormal(Movimiento movimiento) {
@@ -25,10 +30,54 @@ public class Rey extends Trebejo {
 						.getDeltaH() == 1);
 	}
 
-	private Boolean checkEnroque(Movimiento movimiento) {
-		return (movimiento.getTrebejo().getCeroKm()
-				&& movimiento.getDeltaH() == 2 && movimiento.getDeltaV() == 0 && movimiento
-				.getTablero().getEnrocable(movimiento));
+	private boolean checkEnroque(Movimiento movimiento) {
+
+		boolean enroque = false;
+
+		Trebejo candidata = getTorreCandidata(movimiento);
+
+		if (candidata != null && candidata.getEnroca()
+				&& candidata.getBlanca().equals(blanca)) {
+
+			enroque = checkCaminoEnroque(movimiento, candidata);
+		}
+
+		return enroque;
+	}
+
+	private boolean checkCaminoEnroque(Movimiento movimiento, Trebejo candidata) {
+		boolean enroque;
+		int diff = Math.abs(candidata.getPosicion().getH()
+				- movimiento.getTrebejo().getPosicion().getH());
+
+		Boolean libre = true;
+		// chequeo
+		while (libre && diff > 1) {
+			Posicion nuevaPosicion = new Posicion(
+					(byte) (movimiento.getTrebejo().getPosicion().getH() + movimiento
+							.getSentidoH()), candidata.getPosicion().getV());
+
+			diff = Math.abs(candidata.getPosicion().getH()
+					- nuevaPosicion.getH());
+
+			Trebejo bloqueante = movimiento.getTablero().getTrebejoEn(
+					nuevaPosicion);
+
+			if (bloqueante != null) {
+				libre = false;
+			}
+		}
+
+		enroque = libre;
+		return enroque;
+	}
+
+	private Trebejo getTorreCandidata(Movimiento movimiento) {
+		Posicion candidataTorre = new Posicion(
+				(byte) (movimiento.getSentidoH() > 0 ? 8 : 1), movimiento
+						.getTrebejo().getPosicion().getV());
+
+		return movimiento.getTablero().getTrebejoEn(candidataTorre);
 	}
 
 	@Override
