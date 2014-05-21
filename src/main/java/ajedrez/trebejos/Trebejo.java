@@ -10,7 +10,7 @@ public abstract class Trebejo {
 	protected Boolean enroca;
 	protected Boolean pasable;
 	protected Byte movimientos;
-	
+
 	/**
 	 * 
 	 * @param movimiento
@@ -25,7 +25,7 @@ public abstract class Trebejo {
 	protected boolean puedoCoronarme() {
 		return false;
 	}
-	
+
 	/**
 	 * 
 	 * @return una lista de posiciones amenazadas
@@ -40,11 +40,11 @@ public abstract class Trebejo {
 		this.pasable = false;
 	}
 
-	public Boolean moverA(Movimiento movimiento) {
-		
+	public Boolean mover(Movimiento movimiento) {
+
 		/* template method nomás */
 		Boolean valido = esMovimientoValido(movimiento);
-		
+
 		// por ahora se si la pieza aisladamente puede hacer el movimiento
 
 		if (valido) {
@@ -52,16 +52,19 @@ public abstract class Trebejo {
 			// muevo
 			posicion = movimiento.getDestino();
 
+			// va derecho, todas las validaciones fueron previas
+			movimiento.setCaptura(getCaptura(movimiento));
+
 			if (puedoCoronarme()) {
-				movimiento.getTablero().coronar(this);
+				movimiento.setPedirCoronar(true);
 			}
 
 			movimientos++;
 		}
 		return valido;
 	}
-	
-	public void bloqueoUAmenazo(Movimiento movimiento) {
+
+	public void bloqueoOAmenazo(Movimiento movimiento) {
 
 		// voy de < a > esfuerzo
 
@@ -70,7 +73,7 @@ public abstract class Trebejo {
 			return;
 		}
 
-		//si es hay uno del mismo bando ocupando el lugar
+		// si es hay uno del mismo bando ocupando el lugar
 		if (movimiento.getTrebejo().getBlanca().equals(blanca)
 				&& movimiento.getDestino().equals(this.posicion)) {
 			movimiento.setOcupado();
@@ -87,8 +90,13 @@ public abstract class Trebejo {
 		if (movimiento.getImpedimentos() < 1
 				&& !movimiento.getTrebejo().getBlanca().equals(blanca)
 				&& amenazoEsta(movimiento)) {
-			movimiento.setAmenazado();;
+			movimiento.setAmenazado();
+			;
 		}
+	}
+
+	protected Trebejo getCaptura(Movimiento movimiento) {
+		return movimiento.getTablero().getTrebejoEn(movimiento.getDestino());
 	}
 
 	public Posicion getPosicion() {
@@ -97,8 +105,8 @@ public abstract class Trebejo {
 
 	public Boolean getBlanca() {
 		return blanca;
-	}	
-	
+	}
+
 	public Byte getMovimientos() {
 		return movimientos;
 	}
@@ -118,6 +126,5 @@ public abstract class Trebejo {
 	public void setPasable(Boolean pasable) {
 		this.pasable = pasable;
 	}
-	
 
 }

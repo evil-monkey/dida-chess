@@ -28,7 +28,7 @@ public class Peon extends Trebejo {
 	private boolean checkCaptura(Movimiento movimiento) {
 		boolean result = checkCapturaNormal(movimiento);
 		if(!result && checkCapturaAlPaso(movimiento)) {
-			movimiento.setPasado(getTrebejoAlPaso(movimiento));
+			movimiento.setCaptura(getTrebejoAlPaso(movimiento));
 			result = true;
 		}
 		return result;

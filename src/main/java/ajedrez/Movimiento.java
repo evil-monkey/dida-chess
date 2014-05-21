@@ -8,9 +8,11 @@ public class Movimiento {
 
 	private Posicion destino;
 	private Trebejo trebejo;
-	/* los voy a usar para movimientos secundarios */
+	
 	private Trebejo enrocado;
-	private Trebejo pasado;
+	private Trebejo captura;
+	private Boolean pedirCoronar;
+	
 
 	private Byte impedimentos;
 	private LinkedList<Posicion> camino;
@@ -25,8 +27,9 @@ public class Movimiento {
 		this.trebejo = trebejo;
 		this.destino = destino;
 		this.tablero = null;
-		this.setPasado(null);
+		this.captura = null;
 		impedimentos = 0;
+		this.pedirCoronar = false;
 	}
 
 	public Movimiento(Trebejo trebejo, Posicion destino, Tablero tablero) {
@@ -87,12 +90,20 @@ public class Movimiento {
 		this.enrocado = enrocado;
 	}
 
-	public Trebejo getPasado() {
-		return pasado;
+	public Trebejo getCaptura() {
+		return captura;
 	}
 
-	public void setPasado(Trebejo pasado) {
-		this.pasado = pasado;
+	public void setCaptura(Trebejo pasado) {
+		this.captura = pasado;
+	}
+
+	public Boolean getPedirCoronar() {
+		return pedirCoronar;
+	}
+
+	public void setPedirCoronar(Boolean pedirCorornar) {
+		this.pedirCoronar = pedirCorornar;
 	}
 
 	public Integer getDeltaH() {

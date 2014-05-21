@@ -146,11 +146,11 @@ public class Tablero {
 	public Boolean sePuedeMover(Movimiento movimiento) {
 
 		for (Trebejo otro : blancas) {
-			otro.bloqueoUAmenazo(movimiento);
+			otro.bloqueoOAmenazo(movimiento);
 		}
 
 		for (Trebejo otro : negras) {
-			otro.bloqueoUAmenazo(movimiento);
+			otro.bloqueoOAmenazo(movimiento);
 		}
 
 		return true;
