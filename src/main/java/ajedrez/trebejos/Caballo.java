@@ -2,6 +2,7 @@ package ajedrez.trebejos;
 
 import ajedrez.Movimiento;
 import ajedrez.Posicion;
+import ajedrez.excepciones.MovimientoNoPermitido;
 
 public class Caballo extends Trebejo {
 
@@ -20,5 +21,13 @@ public class Caballo extends Trebejo {
 		// si hay alguien en el medio
 		Movimiento amenaza = new Movimiento(this, movimiento.getDestino());
 		return esMovimientoValido(amenaza);
+	}
+
+	@Override
+	protected void checkImpedimentos(Movimiento movimiento) throws MovimientoNoPermitido {
+		if(movimiento.getOcupado()) {
+			throw new MovimientoNoPermitido();
+		}
+		
 	}
 }

@@ -5,6 +5,11 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import ajedrez.creacion.MovimientoFactory;
+import ajedrez.excepciones.FueraDelTablero;
+import ajedrez.excepciones.MovimientoNoPermitido;
+import ajedrez.excepciones.NoEsSuTurno;
+import ajedrez.excepciones.ReyExpuesto;
+import ajedrez.excepciones.TrebejoNoValido;
 import ajedrez.trebejos.Trebejo;
 import ajedrez.trebejos.creacion.FabricaDeAlfiles;
 import ajedrez.trebejos.creacion.FabricaDeCaballos;
@@ -14,8 +19,9 @@ import ajedrez.trebejos.creacion.TrebejoFactory;
 
 public class Tablero {
 
-	private Collection<Trebejo> blancas;
-	private Collection<Trebejo> negras;
+	private Collection<Trebejo> trebejos;
+
+	private Boolean mueveBlanco;
 
 	/*
 	 * bajas
@@ -33,17 +39,14 @@ public class Tablero {
 	private TrebejoFactory fabricaDeReinas;
 	private TrebejoFactory fabricaDeReyes;
 
-	private LinkedList<Movimiento> movimientosBlancas;
-
-	private LinkedList<Movimiento> movimientosNegras;
+	private LinkedList<Movimiento> movimientos;
 
 	private MovimientoFactory fabricaDeMovimientos;
 
 	public Tablero() {
-		this.blancas = new ArrayList<Trebejo>(16);
-		this.negras = new ArrayList<Trebejo>(16);
-		this.movimientosBlancas = new LinkedList<Movimiento>();
-		this.movimientosNegras = new LinkedList<Movimiento>();
+		this.trebejos = new ArrayList<Trebejo>(32);
+		this.movimientos = new LinkedList<Movimiento>();
+		this.mueveBlanco = true;
 	}
 
 	public void coronar(Trebejo trebejo) {
@@ -58,41 +61,177 @@ public class Tablero {
 
 	private void initNegras() {
 
-		negras.addAll(fabricaDePeones.crearCompania((byte) 7, false));
+		trebejos.addAll(fabricaDePeones.crearCompania((byte) 7, false));
 
-		negras.addAll(fabricaDeTorres.crearCompania((byte) 8, false));
+		trebejos.addAll(fabricaDeTorres.crearCompania((byte) 8, false));
 
-		negras.addAll(fabricaDeCaballos.crearCompania((byte) 8, false));
+		trebejos.addAll(fabricaDeCaballos.crearCompania((byte) 8, false));
 
-		negras.addAll(fabricaDeAlfiles.crearCompania((byte) 8, false));
+		trebejos.addAll(fabricaDeAlfiles.crearCompania((byte) 8, false));
 
-		negras.addAll(fabricaDeReinas.crearCompania((byte) 8, false));
+		trebejos.addAll(fabricaDeReinas.crearCompania((byte) 8, false));
 
-		negras.addAll(fabricaDeReyes.crearCompania((byte) 8, false));
+		trebejos.addAll(fabricaDeReyes.crearCompania((byte) 8, false));
 
 	}
 
 	private void initBlancas() {
 
-		blancas.addAll(fabricaDePeones.crearCompania((byte) 2, true));
+		trebejos.addAll(fabricaDePeones.crearCompania((byte) 2, true));
 
-		blancas.addAll(fabricaDeTorres.crearCompania((byte) 1, true));
+		trebejos.addAll(fabricaDeTorres.crearCompania((byte) 1, true));
 
-		blancas.addAll(fabricaDeCaballos.crearCompania((byte) 1, true));
+		trebejos.addAll(fabricaDeCaballos.crearCompania((byte) 1, true));
 
-		blancas.addAll(fabricaDeAlfiles.crearCompania((byte) 1, true));
+		trebejos.addAll(fabricaDeAlfiles.crearCompania((byte) 1, true));
 
-		blancas.addAll(fabricaDeReinas.crearCompania((byte) 1, true));
+		trebejos.addAll(fabricaDeReinas.crearCompania((byte) 1, true));
 
-		blancas.addAll(fabricaDeReyes.crearCompania((byte) 1, true));
+		trebejos.addAll(fabricaDeReyes.crearCompania((byte) 1, true));
 	}
 
-	public Collection<Trebejo> getBlancas() {
-		return blancas;
+	private void checkBounds(Posicion posicion) throws FueraDelTablero {
+		if (posicion == null || posicion.getH() > 8 || posicion.getH() < 1
+				|| posicion.getV() > 8 || posicion.getV() < 1) {
+			throw new FueraDelTablero();
+		}
 	}
 
-	public Collection<Trebejo> getNegras() {
-		return negras;
+	/**
+	 * hace los cambios necesarios en las listas de trebejos y agrega el
+	 * movimento a la lista
+	 * 
+	 * @param movimiento
+	 * @throws MovimientoNoPermitido
+	 * @throws ReyExpuesto 
+	 */
+	private void actualizarme(Movimiento movimiento)
+			throws MovimientoNoPermitido, ReyExpuesto {
+
+		plasmarCaptura(movimiento.getCaptura());
+
+		plasmarEnroque(movimiento.getEnrocado());
+
+		if (checkJaque(movimiento.getTrebejo().getBlanca())) {
+			undo(movimiento);
+			throw new ReyExpuesto();
+		}
+		
+		movimientos.push(movimiento);
+		
+		checkJaque(!movimiento.getTrebejo().getBlanca());
+
+	}
+
+	private void undo(Movimiento movimiento) {
+		
+		if(movimiento.getCaptura() != null ) {
+			if(movimiento.getTrebejo().getBlanca()) {
+				limboBlancas.remove(movimiento.getCaptura());
+			} else {
+				limboNegras.remove(movimiento.getCaptura());
+			}
+			trebejos.add(movimiento.getCaptura());
+		}
+		
+		movimiento.undo();
+		
+	}
+
+	private boolean checkJaque(Boolean blanca) {
+		// TODO Implementar
+		return false;
+	}
+
+	private void plasmarEnroque(Trebejo enrocable) throws MovimientoNoPermitido {
+		enrocable.enrocar();
+	}
+
+	private void plasmarCaptura(Trebejo capturado) {
+		trebejos.remove(capturado);
+
+		if (capturado.getBlanca()) {
+			limboBlancas.add(capturado);
+		} else {
+			limboNegras.add(capturado);
+		}
+
+	}
+
+	public void mover(Posicion desde, Posicion hasta)
+			throws MovimientoNoPermitido, NoEsSuTurno, TrebejoNoValido,
+			FueraDelTablero, ReyExpuesto {
+
+		checkBounds(desde);
+		checkBounds(hasta);
+
+		Trebejo trebejo = getTrebejoEn(desde);
+
+		if (trebejo == null) {
+			throw new TrebejoNoValido();
+		}
+
+		if (mueveBlanco && !trebejo.getBlanca() || !mueveBlanco
+				&& trebejo.getBlanca()) {
+			throw new NoEsSuTurno();
+		}
+
+		Movimiento movimiento = fabricaDeMovimientos.crearMovimiento(trebejo,
+				hasta, this);
+		// el trebejo completa el movimiento
+		trebejo.mover(movimiento);
+		
+		actualizarme(movimiento);
+
+	}
+
+	/**
+	 * chequea un {@link Movimiento} contra todas las piezas en el tablero
+	 * 
+	 * @param movimiento
+	 */
+	public void checkContexto(Movimiento movimiento) {
+
+		for (Trebejo otro : trebejos) {
+			otro.bloqueoOAmenazo(movimiento);
+		}
+
+	}
+
+	/**
+	 * devuelve el trebejo en una posición especificada
+	 * 
+	 * @param lugar
+	 * @return
+	 */
+	public Trebejo getTrebejoEn(Posicion lugar) {
+		Trebejo trebejo = null;
+
+		for (Trebejo candidato : trebejos) {
+			if (trebejo == null && candidato.getPosicion().equals(lugar)) {
+				trebejo = candidato;
+			}
+		}
+
+		return trebejo;
+	}
+
+	/**
+	 * chequea existencia de trebejos en posiciones intermedias de un movimiento
+	 * 
+	 * @param movimiento
+	 * @return
+	 */
+	public boolean elCaminoEstaLibre(Movimiento movimiento) {
+		boolean libre = true;
+		for (Posicion posicion : movimiento.getCamino()) {
+			libre &= getTrebejoEn(posicion) == null;
+		}
+		return libre;
+	}
+
+	public Collection<Trebejo> getTrebejos() {
+		return trebejos;
 	}
 
 	public Collection<Trebejo> getLimboBlancas() {
@@ -135,51 +274,12 @@ public class Tablero {
 		this.fabricaDeMovimientos = fabricaDeMovimientos;
 	}
 
-	public LinkedList<Movimiento> getMovimientosBlancas() {
-		return movimientosBlancas;
+	public LinkedList<Movimiento> getMovimientos() {
+		return movimientos;
 	}
 
-	public LinkedList<Movimiento> getMovimientosNegras() {
-		return movimientosNegras;
+	public Boolean getMueveBlanco() {
+		return mueveBlanco;
 	}
 
-	public Boolean sePuedeMover(Movimiento movimiento) {
-
-		for (Trebejo otro : blancas) {
-			otro.bloqueoOAmenazo(movimiento);
-		}
-
-		for (Trebejo otro : negras) {
-			otro.bloqueoOAmenazo(movimiento);
-		}
-
-		return true;
-	}
-
-	public Trebejo getTrebejoEn(Posicion lugar) {
-		Trebejo trebejo = null;
-
-		for (Trebejo candidato : blancas) {
-			if (trebejo == null && candidato.getPosicion().equals(lugar)) {
-				trebejo = candidato;
-			}
-		}
-		if (trebejo == null) {
-			for (Trebejo candidato : negras) {
-				if (trebejo == null && candidato.getPosicion().equals(lugar)) {
-					trebejo = candidato;
-				}
-			}
-		}
-
-		return trebejo;
-	}
-
-	public boolean elCaminoEstaLibre(Movimiento movimiento) {
-		boolean libre = true;
-		for (Posicion posicion : movimiento.getCamino()) {
-			libre &= getTrebejoEn(posicion) == null;
-		}
-		return libre;
-	}
 }

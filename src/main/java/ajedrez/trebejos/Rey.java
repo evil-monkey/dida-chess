@@ -2,6 +2,7 @@ package ajedrez.trebejos;
 
 import ajedrez.Movimiento;
 import ajedrez.Posicion;
+import ajedrez.excepciones.MovimientoNoPermitido;
 
 public class Rey extends Trebejo {
 
@@ -12,7 +13,7 @@ public class Rey extends Trebejo {
 	@Override
 	protected Boolean esMovimientoValido(Movimiento movimiento) {
 		Boolean result = esMovimientoNormal(movimiento);
-		if(!result && checkEnroque(movimiento)) {
+		if (!result && checkEnroque(movimiento)) {
 			movimiento.setEnrocado(getTorreCandidata(movimiento));
 			result = true;
 		}
@@ -84,6 +85,16 @@ public class Rey extends Trebejo {
 	protected Boolean amenazoEsta(Movimiento movimiento) {
 		Movimiento amenaza = new Movimiento(this, movimiento.getDestino());
 		return esMovimientoNormal(amenaza);
+	}
+
+	@Override
+	protected void checkImpedimentos(Movimiento movimiento)
+			throws MovimientoNoPermitido {
+		if (movimiento.getOcupado() || movimiento.getBloqueado()
+				|| movimiento.getAmenazado()) {
+			throw new MovimientoNoPermitido();
+		}
+
 	}
 
 }

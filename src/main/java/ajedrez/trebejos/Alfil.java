@@ -2,6 +2,7 @@ package ajedrez.trebejos;
 
 import ajedrez.Movimiento;
 import ajedrez.Posicion;
+import ajedrez.excepciones.MovimientoNoPermitido;
 
 public class Alfil extends Trebejo {
 
@@ -18,5 +19,14 @@ public class Alfil extends Trebejo {
 	protected Boolean amenazoEsta(Movimiento movimiento) {
 		Movimiento amenaza = new Movimiento(this, movimiento.getDestino(), movimiento.getTablero());
 		return (esMovimientoValido(amenaza) && amenaza.nadieEnElMedio());
+	}
+
+	@Override
+	protected void checkImpedimentos(Movimiento movimiento)
+			throws MovimientoNoPermitido {
+		if(movimiento.getOcupado()||movimiento.getBloqueado()) {
+			throw new MovimientoNoPermitido();
+		}
+		
 	}
 }

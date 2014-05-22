@@ -2,6 +2,7 @@ package ajedrez.trebejos;
 
 import ajedrez.Movimiento;
 import ajedrez.Posicion;
+import ajedrez.excepciones.MovimientoNoPermitido;
 
 public class Reina extends Trebejo {
 
@@ -24,4 +25,12 @@ public class Reina extends Trebejo {
 		return (esMovimientoValido(amenaza) && amenaza.nadieEnElMedio());
 	}
 
+	@Override
+	protected void checkImpedimentos(Movimiento movimiento)
+			throws MovimientoNoPermitido {
+		if (movimiento.getOcupado() || movimiento.getBloqueado()) {
+			throw new MovimientoNoPermitido();
+		}
+
+	}
 }

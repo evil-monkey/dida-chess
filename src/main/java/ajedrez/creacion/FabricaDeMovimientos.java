@@ -7,10 +7,9 @@ import ajedrez.trebejos.Trebejo;
 
 public class FabricaDeMovimientos implements MovimientoFactory {
 
-	@Override
-	public Movimiento crearMovimiento(Trebejo trebejo, Posicion posicion,
+	public Movimiento crearMovimiento(Trebejo trebejo, Posicion destino,
 			Tablero tablero) {
-		return new Movimiento(trebejo, posicion, tablero);
+		return new Movimiento(trebejo, destino, tablero);
 	}
 
 }

@@ -2,6 +2,7 @@ package ajedrez.trebejos;
 
 import ajedrez.Movimiento;
 import ajedrez.Posicion;
+import ajedrez.excepciones.MovimientoNoPermitido;
 
 public class Peon extends Trebejo {
 
@@ -27,7 +28,7 @@ public class Peon extends Trebejo {
 
 	private boolean checkCaptura(Movimiento movimiento) {
 		boolean result = checkCapturaNormal(movimiento);
-		if(!result && checkCapturaAlPaso(movimiento)) {
+		if (!result && checkCapturaAlPaso(movimiento)) {
 			movimiento.setCaptura(getTrebejoAlPaso(movimiento));
 			result = true;
 		}
@@ -36,12 +37,13 @@ public class Peon extends Trebejo {
 
 	private boolean checkCapturaNormal(Movimiento movimiento) {
 		int factor = blanca ? 1 : -1;
-		Trebejo enDestino = movimiento.getTablero()
-				.getTrebejoEn(movimiento.getDestino());
+		Trebejo enDestino = movimiento.getTablero().getTrebejoEn(
+				movimiento.getDestino());
 		return movimiento.getDeltaH() == 1
 				&& (factor * movimiento.getSentidoV() * movimiento.getDeltaV() == 1)
-				&& enDestino != null && enDestino.getBlanca()
-						.equals(movimiento.getTrebejo().getBlanca());
+				&& enDestino != null
+				&& enDestino.getBlanca().equals(
+						movimiento.getTrebejo().getBlanca());
 	}
 
 	@Override
@@ -59,16 +61,24 @@ public class Peon extends Trebejo {
 		Trebejo trebejoAlPaso = getTrebejoAlPaso(movimiento);
 		return movimiento.getDeltaH() == 1
 				&& (factor * movimiento.getSentidoV() * movimiento.getDeltaV() == 1)
-				&& trebejoAlPaso != null && trebejoAlPaso.getBlanca()
-						.equals(movimiento.getTrebejo().getBlanca());
+				&& trebejoAlPaso != null
+				&& trebejoAlPaso.getBlanca().equals(
+						movimiento.getTrebejo().getBlanca());
 	}
 
 	private Trebejo getTrebejoAlPaso(Movimiento movimiento) {
 		Posicion alPaso = movimiento.getDestino().clone();
 		alPaso.setV((byte) (alPaso.getV() - movimiento.getSentidoV()));
-		Trebejo trebejoAlPaso = movimiento.getTablero()
-				.getTrebejoEn(alPaso);
+		Trebejo trebejoAlPaso = movimiento.getTablero().getTrebejoEn(alPaso);
 		return trebejoAlPaso;
 	}
 
+	@Override
+	protected void checkImpedimentos(Movimiento movimiento)
+			throws MovimientoNoPermitido {
+		if (movimiento.getOcupado() || movimiento.getBloqueado()) {
+			throw new MovimientoNoPermitido();
+		}
+
+	}
 }

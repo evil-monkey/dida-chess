@@ -30,28 +30,51 @@ public class TableroTest {
 
 	@Test
 	public void testInit() {
-		assertNotNull("Blancas no inicializadas", tablero.getBlancas());
-		assertNotNull("Negras no inicializadas", tablero.getNegras());
+		List<Trebejo> blancas = getBlancas(tablero.getTrebejos());
+		List<Trebejo> negras = getNegras(tablero.getTrebejos());
+		
+		assertNotNull("Blancas no inicializadas", blancas);
+		assertNotNull("Negras no inicializadas", negras);
 
-		assertFalse("Sin Blancas", tablero.getBlancas().isEmpty());
-		assertFalse("Sin Negras", tablero.getNegras().isEmpty());
+		assertFalse("Sin Blancas", blancas.isEmpty());
+		assertFalse("Sin Negras", negras.isEmpty());
 
-		assertEquals("Faltan piezas blancas", 16, tablero.getBlancas().size());
-		assertEquals("Faltan piezas negras", 16, tablero.getNegras().size());
+		assertEquals("Faltan piezas blancas", 16, blancas.size());
+		assertEquals("Faltan piezas negras", 16, negras.size());
 	}
 
 	@Test
 	public void testPeonesBlancas() {
-		Collection<Trebejo> bando = tablero.getBlancas();
+		Collection<Trebejo> bando = getBlancas(tablero.getTrebejos());
 		checkPeones(bando, "blancos", 2);
 	}
 
 	@Test
 	public void testPeonesNegros() {
-		Collection<Trebejo> bando = tablero.getNegras();
+		Collection<Trebejo> bando = getNegras(tablero.getTrebejos());
 		checkPeones(bando, "negros", 7);
 	}
-	
+
+	private List<Trebejo> getBlancas(Collection<Trebejo> trebejos) {
+		List<Trebejo> blancas = new ArrayList<Trebejo>();
+		for (Trebejo trebejo : trebejos) {
+			if (trebejo.getBlanca()) {
+				blancas.add(trebejo);
+			}
+		}
+		return blancas;
+	}
+
+	private List<Trebejo> getNegras(Collection<Trebejo> trebejos) {
+		List<Trebejo> negras = new ArrayList<Trebejo>();
+		for (Trebejo trebejo : trebejos) {
+			if (!trebejo.getBlanca()) {
+				negras.add(trebejo);
+			}
+		}
+		return negras;
+	}
+
 	private void checkPeones(Collection<Trebejo> bando, String color, int fila) {
 		Map<String, List<Trebejo>> companias = clasificarBando(bando);
 

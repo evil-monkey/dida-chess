@@ -7,12 +7,13 @@ import ajedrez.trebejos.Trebejo;
 public class Movimiento {
 
 	private Posicion destino;
+	private Posicion origen;
 	private Trebejo trebejo;
-	
+
 	private Trebejo enrocado;
+	private Posicion origenEnrocado;
 	private Trebejo captura;
 	private Boolean pedirCoronar;
-	
 
 	private Byte impedimentos;
 	private LinkedList<Posicion> camino;
@@ -26,6 +27,7 @@ public class Movimiento {
 	public Movimiento(Trebejo trebejo, Posicion destino) {
 		this.trebejo = trebejo;
 		this.destino = destino;
+		this.origen = trebejo.getPosicion();
 		this.tablero = null;
 		this.captura = null;
 		impedimentos = 0;
@@ -72,7 +74,7 @@ public class Movimiento {
 	}
 
 	public LinkedList<Posicion> getCamino() {
-		if(camino == null) {
+		if (camino == null) {
 			haceCamino();
 		}
 		return camino;
@@ -88,6 +90,7 @@ public class Movimiento {
 
 	public void setEnrocado(Trebejo enrocado) {
 		this.enrocado = enrocado;
+		this.origenEnrocado = enrocado.getPosicion();
 	}
 
 	public Trebejo getCaptura() {
@@ -178,8 +181,24 @@ public class Movimiento {
 		setImpedimentos((byte) (getImpedimentos() | 8));
 	}
 
+	public boolean getAmenazado() {
+		return (getImpedimentos() & 1) > 0;
+	}
+
+	public boolean getBloqueado() {
+		return (getImpedimentos() & 2) > 0;
+	}
+
+	public boolean getOcupado() {
+		return (getImpedimentos() | 4) > 0;
+	}
+
+	public boolean getNoValido() {
+		return (getImpedimentos() | 8) > 0;
+	}
+
 	protected void haceCamino() {
-		
+
 		this.camino = new LinkedList<Posicion>();
 		// me muevo deltaH posiciones horizontalmente
 		for (int i = 1; i < this.getDeltaH(); i++) {
@@ -202,6 +221,13 @@ public class Movimiento {
 
 	public boolean nadieEnElMedio() {
 		return tablero.elCaminoEstaLibre(this);
+	}
+
+	public void undo() {
+		trebejo.setPosicion(origen);
+		if (enrocado != null) {
+			enrocado.setPosicion(origenEnrocado);
+		}
 	}
 
 }

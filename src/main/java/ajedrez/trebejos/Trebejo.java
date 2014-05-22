@@ -2,6 +2,7 @@ package ajedrez.trebejos;
 
 import ajedrez.Movimiento;
 import ajedrez.Posicion;
+import ajedrez.excepciones.MovimientoNoPermitido;
 
 public abstract class Trebejo {
 
@@ -17,6 +18,13 @@ public abstract class Trebejo {
 	 * @return
 	 */
 	protected abstract Boolean esMovimientoValido(Movimiento movimiento);
+
+	/**
+	 * 
+	 * @param movimiento
+	 * @throws MovimientoNoPermitido 
+	 */
+	protected abstract void checkImpedimentos(Movimiento movimiento) throws MovimientoNoPermitido;
 
 	/*
 	 * dejo esta implementación por default ya que sólo los peones pueden
@@ -40,28 +48,30 @@ public abstract class Trebejo {
 		this.pasable = false;
 	}
 
-	public Boolean mover(Movimiento movimiento) {
+	public void mover(Movimiento movimiento) throws MovimientoNoPermitido {
 
 		/* template method nomás */
-		Boolean valido = esMovimientoValido(movimiento);
-
-		// por ahora se si la pieza aisladamente puede hacer el movimiento
-
-		if (valido) {
-			valido = movimiento.getTablero().sePuedeMover(movimiento);
-			// muevo
-			posicion = movimiento.getDestino();
-
-			// va derecho, todas las validaciones fueron previas
-			movimiento.setCaptura(getCaptura(movimiento));
-
-			if (puedoCoronarme()) {
-				movimiento.setPedirCoronar(true);
-			}
-
-			movimientos++;
+		if (!esMovimientoValido(movimiento)) {
+			throw new MovimientoNoPermitido();
 		}
-		return valido;
+
+		// agrego información sobre el contexto
+		movimiento.getTablero().checkContexto(movimiento);
+		// verifico esa info según qué trebejo es
+		checkImpedimentos(movimiento);
+
+		// muevo
+		posicion = movimiento.getDestino();
+
+		// va derecho, todas las validaciones fueron previas
+		movimiento.setCaptura(getCaptura(movimiento));
+
+		if (puedoCoronarme()) {
+			movimiento.setPedirCoronar(true);
+		}
+
+		movimientos++;
+
 	}
 
 	public void bloqueoOAmenazo(Movimiento movimiento) {
@@ -91,7 +101,6 @@ public abstract class Trebejo {
 				&& !movimiento.getTrebejo().getBlanca().equals(blanca)
 				&& amenazoEsta(movimiento)) {
 			movimiento.setAmenazado();
-			;
 		}
 	}
 
@@ -101,6 +110,10 @@ public abstract class Trebejo {
 
 	public Posicion getPosicion() {
 		return posicion;
+	}
+	
+	public void setPosicion(Posicion posicion) {
+		this.posicion = posicion;
 	}
 
 	public Boolean getBlanca() {
@@ -125,6 +138,10 @@ public abstract class Trebejo {
 
 	public void setPasable(Boolean pasable) {
 		this.pasable = pasable;
+	}
+
+	public void enrocar() throws MovimientoNoPermitido {
+		throw new MovimientoNoPermitido();
 	}
 
 }
